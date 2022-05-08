@@ -143,7 +143,7 @@ class Bot(BotBase):
         else:
             print("Reconectando Bot")   
 
-    async def on_message(self, message):
-        pass
+    async def on_message(self, ctx):
+        await self.process_commands(ctx)
         
 bot = Bot()
