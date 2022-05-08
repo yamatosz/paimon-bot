@@ -1,16 +1,22 @@
 import discord
+from asyncio import sleep
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  
 from apscheduler.triggers.cron import CronTrigger    
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import CommandNotFound
 from discord import Intents, Embed
 from datetime import datetime
+from glob import glob
 from .. import db
 
 
 PREFIX = "!"
 OWNER_ID = 428994845403774978
 ATIVIDADE = discord.Game(name='Lolzito')
+
+## Cria uma lista com todos os arquivos cogs
+COGS = [path.split("\\")[-1][:-3] for path in glob("./lib/cogs/*.py")]
+        
 
 class Bot(BotBase):
     def __init__(self):
@@ -25,8 +31,21 @@ class Bot(BotBase):
                         intents=Intents.all(),
                         activity = ATIVIDADE)
 
+    ## Funcao para inciar o carramento da lista com os cogs
+    def setup(self):
+        for cog in COGS:
+            self.load_extension(f"lib.cogs.{cog}")
+            print(f'{cog}(cog) carregado.')
+
+        print('Setup completo')
+        print('-------------------')
+
     def run(self, version):
         self.VERSION = version
+
+        print('-------------------')
+        print('Carregando setup...')
+        self.setup()
 
         with open("./lib/bot/token.0", "r", encoding="utf-8") as r:
             self.TOKEN = r.read()
@@ -83,11 +102,13 @@ class Bot(BotBase):
     async def on_ready(self):
         if not self.ready:
             self.ready=True
-            self.scheduler.start()
-            self.scheduler.add_job(self.weblogin_reminder, CronTrigger(second=0))
+            
+            ## Iniciar os eventos de agendamento
+            ##self.scheduler.start()
+            ##self.scheduler.add_job(self.weblogin_reminder, CronTrigger(second=0))
 
             
-            ##
+            ## Embed de alerta ao ficar online
             autor = self.get_user(self.owner_id)
             channel = self.get_channel(928977970712965120)
             guild = self.get_guild(916664641009090590)
@@ -107,11 +128,17 @@ class Bot(BotBase):
             embed.set_thumbnail(url=self.user.avatar_url)
             embed.set_image(url=guild.icon_url)
 
+            ## Envia o embed e apaga apos 60 segundos
             await channel.send(embed=embed, delete_after=60)
 
-            ##
+            ##     
+    
             print("Bot pronto")
-            print(f"{self.user.name}")
+            print('--------')
+            print(f"|{self.user.name}|")
+            print('--------')
+
+            self.ready = True
 
         else:
             print("Reconectando Bot")   
