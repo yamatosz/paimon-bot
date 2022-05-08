@@ -1,7 +1,3 @@
-from ast import arg
-from os import link
-from pydoc import describe
-from sqlite3 import Timestamp
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  
 from apscheduler.triggers.cron import CronTrigger    
